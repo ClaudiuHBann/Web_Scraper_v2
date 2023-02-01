@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "Stopwatch.h"
-#include "String.h"
 
 namespace Utility {
     Stopwatch::Stopwatch(const String& name, const bool start /* = false */) {

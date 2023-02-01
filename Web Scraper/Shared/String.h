@@ -1,12 +1,14 @@
 #pragma once
 
-namespace Utility {
+namespace Shared {
 #if defined(_UNICODE) || defined(UNICODE)
     using String = wstring;
     using StringStream = wstringstream;
+    using IfStream = wifstream;
 #else
     using String = string;
     using StringStream = stringstream;
+    using IfStream = ifstream;
 #endif // _UNICODE
 
     template <typename T>

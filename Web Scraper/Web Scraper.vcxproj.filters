@@ -1,50 +1,42 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Utility">
       <UniqueIdentifier>{3fe78071-c326-4251-915d-c8e7d9d12de0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Scraper">
+      <UniqueIdentifier>{655a2292-45ce-4143-8e3b-170151ba0e9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Parser">
+      <UniqueIdentifier>{2ff99813-66d3-4f4c-8f6a-0f93bb1765c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shared">
+      <UniqueIdentifier>{ffe193e5-94b1-4889-9fd9-db560a73564c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Utility\Stopwatch.h">
-      <Filter>Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="Utility\String.h">
       <Filter>Utility</Filter>
     </ClInclude>
     <ClInclude Include="Utility\Logger.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="Utility\Utility.h">
-      <Filter>Utility</Filter>
-    </ClInclude>
     <ClInclude Include="Utility\GUID.h">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="Parser\Parser.h">
+      <Filter>Parser</Filter>
+    </ClInclude>
+    <ClInclude Include="Shared\String.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="Shared\File.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Utility\Stopwatch.cpp">
-      <Filter>Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="Utility\String.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
     <ClCompile Include="Utility\Logger.cpp">
@@ -52,6 +44,16 @@
     </ClCompile>
     <ClCompile Include="Utility\GUID.cpp">
       <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Parser\Parser.cpp">
+      <Filter>Parser</Filter>
+    </ClCompile>
+    <ClCompile Include="Shared\String.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="Shared\File.cpp">
+      <Filter>Shared</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

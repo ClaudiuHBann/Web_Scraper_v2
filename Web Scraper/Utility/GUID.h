@@ -1,6 +1,8 @@
 #pragma once
 
-#include "String.h"
+#include "Shared/String.h"
+
+using namespace Shared;
 
 namespace Utility {
     class GUID {
