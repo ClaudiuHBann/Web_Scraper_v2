@@ -6,6 +6,7 @@
 #define TRACE_LOCATION_FILE_LINE Utility::String(Utility::String(TEXT(__FILE__)) + TEXT(":") + Utility::ToString(__LINE__))
 #define TRACE_LOCATION Utility::String(TRACE_LOCATION_PROCESS_THREAD_ID + TEXT("\t") + TRACE_LOCATION_FILE_LINE)
 #define TRACE(str) Utility::Print<const ::TCHAR*>((TRACE_LOCATION + TEXT("\t\t") + Utility::ToString(str)).c_str())
+#define TRACE_EX(strn) TRACE((Utility::StringStream() << strn).str())
 
 namespace Utility {
     template<typename Object, typename Iterable>

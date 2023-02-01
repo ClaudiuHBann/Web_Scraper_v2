@@ -5,7 +5,7 @@ int main() {
     Stopwatch stopwatch(TEXT("test"), true);
 
     Utility::GUID guid;
-    TRACE(guid.GetString());
+    TRACE_EX(guid.GetString() << " test" << " more");
 
     TRACE(stopwatch.GetTimeElapsed(TEXT("test")).count());
 

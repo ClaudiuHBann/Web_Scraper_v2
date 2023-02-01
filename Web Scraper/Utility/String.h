@@ -3,8 +3,10 @@
 namespace Utility {
 #if defined(_UNICODE) || defined(UNICODE)
     using String = wstring;
+    using StringStream = wstringstream;
 #else
     using String = string;
+    using StringStream = stringstream;
 #endif // _UNICODE
 
     template <typename T>
