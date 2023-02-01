@@ -156,6 +156,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Utility\GUID.h" />
     <ClInclude Include="Utility\Logger.h" />
     <ClInclude Include="Utility\Stopwatch.h" />
     <ClInclude Include="Utility\String.h" />
@@ -163,6 +164,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Utility\GUID.cpp" />
     <ClCompile Include="Utility\Logger.cpp" />
     <ClCompile Include="Utility\Stopwatch.cpp" />
     <ClCompile Include="Utility\String.cpp" />

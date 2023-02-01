@@ -33,6 +33,9 @@
     <ClInclude Include="Utility\Utility.h">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="Utility\GUID.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -45,6 +48,9 @@
       <Filter>Utility</Filter>
     </ClCompile>
     <ClCompile Include="Utility\Logger.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\GUID.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
   </ItemGroup>
