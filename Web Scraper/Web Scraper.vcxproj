@@ -157,6 +157,8 @@
   <ItemGroup>
     <ClInclude Include="Parser\Parser.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Scraper\DownloadProgress.h" />
+    <ClInclude Include="Scraper\Scraper.h" />
     <ClInclude Include="Shared\File.h" />
     <ClInclude Include="Shared\String.h" />
     <ClInclude Include="Utility\GUID.h" />
@@ -166,6 +168,8 @@
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Parser\Parser.cpp" />
+    <ClCompile Include="Scraper\DownloadProgress.cpp" />
+    <ClCompile Include="Scraper\Scraper.cpp" />
     <ClCompile Include="Shared\File.cpp" />
     <ClCompile Include="Shared\String.cpp" />
     <ClCompile Include="Utility\GUID.cpp" />

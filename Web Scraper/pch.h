@@ -5,6 +5,9 @@
 #include <Rpc.h>
 #pragma comment(lib, "Rpcrt4.lib")
 
+#include <Urlmon.h>
+#pragma comment(lib, "urlmon.lib")
+
 
 
 #include <iostream>
@@ -21,6 +24,7 @@
 
 #include <functional>
 #include <algorithm>
+#include <future>
 #include <mutex>
 
 
