@@ -24,4 +24,14 @@ namespace Shared {
 #endif // _UNICODE
         }
     }
+
+    namespace StringUtil {
+        String RemoveStringLead(const String& data, const String& lead);
+        String StringLead(const String& data, const String& lead);
+
+        String RemoveStringTrail(const String& data, const String& trail);
+        String StringTrail(const String& data, const String& trail);
+
+        bool Contains(const String& data, const String& query);
+    }
 }
