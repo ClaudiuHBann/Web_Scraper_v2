@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "Scraper.h"
-#include "DownloadProgress.h"
 
 namespace Scraper {
     HRESULT URLToFile(const String& url, const String& file, DownloadProgress* downloadProgress /* = nullptr */) {
@@ -8,7 +7,7 @@ namespace Scraper {
     }
 
     HRESULT URLToFileCache(const String& url, String& file, DownloadProgress* downloadProgress /* = nullptr */) {
-        TCHAR buffer[MAX_PATH];
+        ::TCHAR buffer[MAX_PATH];
         auto result = URLDownloadToCacheFile(nullptr, url.c_str(), buffer, MAX_PATH, 0, downloadProgress);
 
         file.assign(buffer);

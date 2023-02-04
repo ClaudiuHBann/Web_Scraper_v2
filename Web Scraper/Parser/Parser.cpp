@@ -2,22 +2,52 @@
 #include "Parser.h"
 
 namespace Parser {
-    constexpr TCHAR QUOTE_CHAR = TEXT('"');
+    constexpr ::TCHAR QUOTE_CHAR = TEXT('"');
     constexpr size_t QUOTE_CHAR_SIZE = 1;
 
-    vector<size_t> FindAllOccurrences(const String& data, const String& query) {
-        vector<size_t> occurrences;
+    constexpr ::TCHAR TAG_OPEN_START = TEXT('<');
+    constexpr size_t TAG_OPEN_START_SIZE = 1;
+    constexpr ::TCHAR TAG_CLOSE_START = TEXT('</');
+    constexpr ::TCHAR TAG_OPEN_END = TEXT('>');
+    constexpr ::TCHAR TAG_OPEN_END_SPECIAL[] = TEXT("/>");
+    constexpr size_t TAG_OPEN_END_SPECIAL_SIZE = 2;
+    constexpr ::TCHAR TAG_CLOSE_END = TEXT('>');
+    const vector<String> TAGS_SELF_CLOSED {
+        TEXT("area"),
+        TEXT("base"),
+        TEXT("br"),
+        TEXT("col"),
+        TEXT("embed"),
+        TEXT("hr"),
+        TEXT("img"),
+        TEXT("input"),
+        TEXT("link"),
+        TEXT("meta"),
+        TEXT("param"),
+        TEXT("source"),
+        TEXT("track"),
+        TEXT("wbr")
+    };
 
-        auto pos = data.find(query);
-        while (pos != String::npos) {
-            occurrences.push_back(pos);
-            pos = data.find(query, pos + query.size());
+    String FindElementSpecial(const String& data, const String& elementName, const pair<String, String>& elementAttributeValuePairs /* = {} */, const size_t offset /* = 0 */) {
+        if (ranges::find(TAGS_SELF_CLOSED, elementName) == TAGS_SELF_CLOSED.end()) {
+            return {};
         }
 
-        return occurrences;
+        auto elementOpenStart = data.find(TAG_OPEN_START, offset);
+        if (elementOpenStart == String::npos) {
+            return {};
+        }
+
+        auto elementOpenEnd = data.find(TAG_OPEN_END_SPECIAL, elementOpenStart + elementName.size());
+        if (elementOpenEnd == String::npos) {
+            return {};
+        }
+
+        return data.substr(elementOpenStart, elementOpenEnd + TAG_OPEN_END_SPECIAL_SIZE - elementOpenStart);
     }
 
-    String GetAttributeValue(const String& element, const String& attribute, const size_t offset /* = 0 */) {
+    String FindAttributeValue(const String& element, const String& attribute, const size_t offset /* = 0 */) {
         auto attributePos = element.find(attribute, offset);
         if (attributePos == String::npos) {
             return {};
@@ -36,8 +66,7 @@ namespace Parser {
         return element.substr(posValueStart, posValueEnd - posValueStart);
     }
 
-    vector<String> Split(const String& data, const String& delimiter) {
-        auto dataSplitted = data | views::split(delimiter);
-        return vector<String>(dataSplitted.begin(), dataSplitted.end());
+    String FindElement(const String& data, const String& elementName, const pair<String, String>& elementAttributeValuePairs /* = {} */, const size_t offset /* = 0 */) {
+        return {};
     }
 }

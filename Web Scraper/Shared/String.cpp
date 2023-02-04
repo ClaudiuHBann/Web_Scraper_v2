@@ -26,5 +26,22 @@ namespace Shared {
         bool Contains(const String& data, const String& query) {
             return data.find(query) != String::npos;
         }
+
+        vector<String> Split(const String& data, const String& delimiter) {
+            auto dataSplitted = data | views::split(delimiter);
+            return vector<String>(dataSplitted.begin(), dataSplitted.end());
+        }
+
+        vector<size_t> FindAllOccurrences(const String& data, const String& query) {
+            vector<size_t> occurrences;
+
+            auto pos = data.find(query);
+            while (pos != String::npos) {
+                occurrences.push_back(pos);
+                pos = data.find(query, pos + query.size());
+            }
+
+            return occurrences;
+        }
     }
 }

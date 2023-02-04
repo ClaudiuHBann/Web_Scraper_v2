@@ -31,7 +31,7 @@ namespace Scraper {
         mCallbackOnObjectAvailable = callbackOnObjectAvailable;
     }
 
-    HRESULT __stdcall DownloadProgress::OnStartBinding(DWORD dwReserved, IBinding* pib) {
+    HRESULT __stdcall DownloadProgress::OnStartBinding(DWORD /*dwReserved*/, IBinding* pib) {
         return mCallbackOnStartBinding(pib);
     }
 

@@ -33,5 +33,9 @@ namespace Shared {
         String StringTrail(const String& data, const String& trail);
 
         bool Contains(const String& data, const String& query);
+
+        vector<String> Split(const String& data, const String& delimiter);
+
+        vector<size_t> FindAllOccurrences(const String& data, const String& query);
     }
 }

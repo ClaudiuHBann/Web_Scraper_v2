@@ -1,10 +1,9 @@
 #pragma once
 
 #include "Shared/String.h"
+#include "DownloadProgress.h"
 
 using namespace Shared;
-
-class DownloadProgress;
 
 namespace Scraper {
     HRESULT URLToFile(const String& url, const String& file, DownloadProgress* downloadProgress = nullptr);

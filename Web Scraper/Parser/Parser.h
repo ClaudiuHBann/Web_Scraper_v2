@@ -5,9 +5,8 @@
 using namespace Shared;
 
 namespace Parser {
-    vector<size_t> FindAllOccurrences(const String& data, const String& query);
+    String FindElementSpecial(const String& data, const String& elementName, const pair<String, String>& elementAttributeValuePairs = {}, const size_t offset = 0);
+    String FindElement(const String& data, const String& elementName, const pair<String, String>& elementAttributeValuePairs = {}, const size_t offset = 0);
 
-    String GetAttributeValue(const String& element, const String& attribute, const size_t offset = 0);
-
-    vector<String> Split(const String& data, const String& delimiter);
+    String FindAttributeValue(const String& element, const String& attribute, const size_t offset = 0);
 }
