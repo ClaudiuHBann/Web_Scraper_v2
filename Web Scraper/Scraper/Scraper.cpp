@@ -1,24 +1,25 @@
 #include "pch.h"
 #include "Scraper.h"
+#include "DownloadProgress.h"
 
 namespace Scraper {
-    HRESULT URLToFile(const String& url, const String& file, DownloadProgress* downloadProgress /* = nullptr */) {
-        return URLDownloadToFile(nullptr, url.c_str(), file.c_str(), 0, downloadProgress);
+    bool URLToFile(const String& url, const String& file, DownloadProgress* downloadProgress /* = nullptr */) {
+        return SUCCEEDED(::URLDownloadToFile(nullptr, url.c_str(), file.c_str(), 0, downloadProgress));
     }
 
-    HRESULT URLToFileCache(const String& url, String& file, DownloadProgress* downloadProgress /* = nullptr */) {
+    bool URLToFileCache(const String& url, String& file, DownloadProgress* downloadProgress /* = nullptr */) {
         ::TCHAR buffer[MAX_PATH];
-        auto result = URLDownloadToCacheFile(nullptr, url.c_str(), buffer, MAX_PATH, 0, downloadProgress);
+        auto result = ::URLDownloadToCacheFile(nullptr, url.c_str(), buffer, MAX_PATH, 0, downloadProgress);
 
         file.assign(buffer);
-        return result;
+        return SUCCEEDED(result);
     }
 
-    future<HRESULT> URLToFileAsync(const String& url, const String& file, DownloadProgress* downloadProgress /* = nullptr */) {
+    future<bool> URLToFileAsync(const String& url, const String& file, DownloadProgress* downloadProgress /* = nullptr */) {
         return async(launch::async, [=, &downloadProgress] () { return URLToFile(url, file, downloadProgress); });
     }
 
-    future<HRESULT> URLToFileCacheAsync(const String& url, String& file, DownloadProgress* downloadProgress /* = nullptr */) {
+    future<bool> URLToFileCacheAsync(const String& url, String& file, DownloadProgress* downloadProgress /* = nullptr */) {
         return async(launch::async, [&, url] () { return URLToFileCache(url, file, downloadProgress); });
     }
 }

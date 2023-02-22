@@ -8,6 +8,9 @@
 #include <Urlmon.h>
 #pragma comment(lib, "urlmon.lib")
 
+#include <wininet.h>
+#pragma comment(lib, "Wininet.lib")
+
 
 
 #include <iostream>
