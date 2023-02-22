@@ -1,5 +1,16 @@
 #pragma once
 
+namespace impl {
+    template<typename T>
+    inline constexpr bool is_basic_string_v = false;
+
+    template<typename... T>
+    inline constexpr bool is_basic_string_v<basic_string<T...>> = true;
+}
+
+template<typename T>
+inline constexpr bool is_basic_string_v = impl::is_basic_string_v<T>;
+
 namespace Shared {
 #if defined(_UNICODE) || defined(UNICODE)
     using String = wstring;
@@ -22,6 +33,18 @@ namespace Shared {
 #else
             return to_string(t);
 #endif // _UNICODE
+        }
+    }
+
+    template<typename StringType, typename StringFrom>
+    inline auto ToStringType(const StringFrom& strTo) {
+        static_assert(is_basic_string_v<StringFrom>, "The StringFrom is not a basic_string!");
+        static_assert(is_arithmetic_v<StringType>, "The StringType is not a built-in type!");
+
+        if constexpr (is_same_v<typename StringFrom::value_type, StringType>) {
+            return strTo;
+        } else {
+            return basic_string<StringType, char_traits<StringType>, allocator<StringType>>(strTo.begin(), strTo.end());
         }
     }
 
