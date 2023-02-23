@@ -2,7 +2,7 @@
 
 #include "Shared/String.h"
 
-class DownloadProgress;
+class BindStatus;
 
 namespace Scraper {
     using namespace Shared;
@@ -10,11 +10,11 @@ namespace Scraper {
     constexpr auto DEFAULT_USER_AGENT = TEXT("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36");
     constexpr auto DEFAULT_BUFFER_SIZE = 8192;
 
-    bool URLToFile(const String& url, const String& file, DownloadProgress* downloadProgress = nullptr);
-    future<bool> URLToFileAsync(const String& url, const String& file, DownloadProgress* downloadProgress = nullptr);
+    bool URLToFile(const String& url, const String& file, BindStatus* bindStatus = nullptr);
+    future<bool> URLToFileAsync(const String& url, const String& file, BindStatus* bindStatus = nullptr);
 
-    bool URLToFileCache(const String& url, String& file, DownloadProgress* downloadProgress = nullptr);
-    future<bool> URLToFileCacheAsync(const String& url, String& file, DownloadProgress* downloadProgress = nullptr);
+    bool URLToFileCache(const String& url, String& file, BindStatus* bindStatus = nullptr);
+    future<bool> URLToFileCacheAsync(const String& url, String& file, BindStatus* bindStatus = nullptr);
 
     template <class _Elem = char, class _Traits = char_traits<_Elem>, class _Alloc = allocator<_Elem>>
     inline bool URLToString(
