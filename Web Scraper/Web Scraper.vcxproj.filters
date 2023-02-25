@@ -13,6 +13,9 @@
     <Filter Include="Shared">
       <UniqueIdentifier>{ffe193e5-94b1-4889-9fd9-db560a73564c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Scraper\Progress">
+      <UniqueIdentifier>{bc70af93-7de6-4698-acd5-95b7107ebbf2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utility\Stopwatch.h">
@@ -34,11 +37,14 @@
       <Filter>Shared</Filter>
     </ClInclude>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Scraper\DownloadProgress.h">
-      <Filter>Scraper</Filter>
-    </ClInclude>
     <ClInclude Include="Scraper\Scraper.h">
       <Filter>Scraper</Filter>
+    </ClInclude>
+    <ClInclude Include="Scraper\Progress\BindStatus.h">
+      <Filter>Scraper\Progress</Filter>
+    </ClInclude>
+    <ClInclude Include="Scraper\Progress\InternetStatus.h">
+      <Filter>Scraper\Progress</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -61,11 +67,14 @@
     <ClCompile Include="Shared\File.cpp">
       <Filter>Shared</Filter>
     </ClCompile>
-    <ClCompile Include="Scraper\DownloadProgress.cpp">
-      <Filter>Scraper</Filter>
-    </ClCompile>
     <ClCompile Include="Scraper\Scraper.cpp">
       <Filter>Scraper</Filter>
+    </ClCompile>
+    <ClCompile Include="Scraper\Progress\BindStatus.cpp">
+      <Filter>Scraper\Progress</Filter>
+    </ClCompile>
+    <ClCompile Include="Scraper\Progress\InternetStatus.cpp">
+      <Filter>Scraper\Progress</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

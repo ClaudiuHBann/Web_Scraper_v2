@@ -23,6 +23,7 @@
 #include <map>
 
 #include <filesystem>
+#include <cassert>
 #include <chrono>
 
 #include <functional>
