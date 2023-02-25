@@ -27,10 +27,10 @@ namespace Shared {
             return data.find(query) != String::npos;
         }
 
-        vector<String> Split(const String& data, const String& delimiter) {
+        /*vector<String> Split(const String& data, const String& delimiter) {
             auto dataSplitted = data | views::split(delimiter);
             return vector<String>(dataSplitted.begin(), dataSplitted.end());
-        }
+        }*/
 
         vector<size_t> FindAllOccurrences(const String& data, const String& query) {
             vector<size_t> occurrences;
