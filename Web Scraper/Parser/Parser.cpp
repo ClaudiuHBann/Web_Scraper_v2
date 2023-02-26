@@ -2,17 +2,23 @@
 #include "Parser.h"
 
 namespace Parser {
-	HTMLParser::HTMLParser() {
+	HTMLParser::HTMLParser(const String& html /* = {} */) {
 		auto result = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 		mInitialized = result == S_OK || result == S_FALSE || result == RPC_E_CHANGED_MODE;
 
 		if (mInitialized)
 		{
 			result = CoCreateInstance(CLSID_HTMLDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IHTMLDocument2, (void**)&mIHTMLDocument2);
+			if (!html.empty() && SUCCEEDED(result))
+			{
+				SetHTML(html);
+			}
 		}
 	}
 
 	HTMLParser::~HTMLParser() {
+		Reset();
+
 		if (mIHTMLDocument2)
 		{
 			mIHTMLDocument2->Release();
@@ -34,32 +40,51 @@ namespace Parser {
 			return false;
 		}
 
+		Reset();
+
 		CString htmlCString(html.c_str());
 
-		SAFEARRAY* safeArray = SafeArrayCreateVector(VT_VARIANT, 0, 1);
-		if (!safeArray)
+		mSafeArray = SafeArrayCreateVector(VT_VARIANT, 0, 1);
+		if (!mSafeArray)
 		{
 			return false;
 		}
 
-		VARIANT* variant{};
-		auto result = SafeArrayAccessData(safeArray, (LPVOID*)&variant);
-		if (!variant)
+		auto result = SafeArrayAccessData(mSafeArray, (LPVOID*)&mVariant);
+		if (!mVariant)
 		{
-			SafeArrayDestroy(safeArray);
+			SafeArrayDestroy(mSafeArray);
 			return false;
 		}
 
-		variant->vt = VT_BSTR;
-		variant->bstrVal = htmlCString.AllocSysString();
+		mVariant->vt = VT_BSTR;
+		mVariant->bstrVal = htmlCString.AllocSysString();
+
+		result = mIHTMLDocument2->write(mSafeArray);
+
+		mReset = true;
+		return SUCCEEDED(result);
+	}
+
+	void HTMLParser::Reset() {
+		if (!mReset)
+		{
+			return;
+		}
 
 		mIHTMLDocument2->close();
-		result = mIHTMLDocument2->write(safeArray);
 
-		SysFreeString(variant->bstrVal);
-		SafeArrayUnaccessData(safeArray);
-		SafeArrayDestroy(safeArray);
+		if (mVariant && mVariant->bstrVal)
+		{
+			SysFreeString(mVariant->bstrVal);
+		}
 
-		return SUCCEEDED(result);
+		if (mSafeArray)
+		{
+			//SafeArrayUnaccessData(mSafeArray);
+			SafeArrayDestroy(mSafeArray);
+		}
+
+		mReset = false;
 	}
 }

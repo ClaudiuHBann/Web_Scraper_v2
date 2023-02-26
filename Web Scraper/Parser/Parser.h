@@ -2,13 +2,13 @@
 
 #include "Shared/String.h"
 
-using namespace Shared;
-
 namespace Parser {
+	using namespace Shared;
+
 	class HTMLParser
 	{
 	public:
-		HTMLParser();
+		HTMLParser(const String& html = {});
 		~HTMLParser();
 
 		IHTMLDocument2* GetIHTMLDocument2();
@@ -17,6 +17,11 @@ namespace Parser {
 
 	private:
 		bool mInitialized{};
+		bool mReset{};
+		SAFEARRAY* mSafeArray{};
+		VARIANT* mVariant{};
 		IHTMLDocument2* mIHTMLDocument2{};
+
+		void Reset();
 	};
 }

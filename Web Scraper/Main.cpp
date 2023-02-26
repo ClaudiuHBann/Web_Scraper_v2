@@ -1,23 +1,22 @@
 #include "pch.h"
 #include "Scraper/Scraper.h"
-#include "Shared/File.h"
-#include "Utility/Logger.h"
 #include "Parser/Parser.h"
 
 using namespace Scraper;
-using namespace Shared;
-using namespace Utility;
 using namespace Parser;
 
 int main() {
-	WebScraper webScraper;
-	InternetStatus callback;
+	WebScraper scraper;
+	InternetStatus scraperEvents;
 
 	String url(TEXT("https://github.com/ClaudiuHBann?tab=repositories"));
-	string str;
-	if (webScraper.URLToString(url, str, TEXT(""), 0, &callback)) {
-		TRACE(ToStringType<wchar_t>(str));
+	String urlHTML;
+	if (!scraper.URLToString(url, urlHTML, TEXT(""), 0, &scraperEvents)) {
+		return 1;
 	}
+
+	TRACE(urlHTML);
+	HTMLParser parser(urlHTML);
 
 	return 0;
 }
