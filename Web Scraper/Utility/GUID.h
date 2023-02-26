@@ -2,37 +2,37 @@
 
 #include "Shared/String.h"
 
-using namespace Shared;
-
 namespace Utility {
-    class GUID {
+	using namespace Shared;
+
+	class GUID {
 #if defined(_UNICODE) || defined(UNICODE)
-        using RPC_STR = ::RPC_WSTR;
+		using RPC_STR = ::RPC_WSTR;
 #else
-        using RPC_STR = ::RPC_STR;
+		using RPC_STR = ::RPC_STR;
 #endif // UNICODE
 
-    public:
-        GUID();
-        ~GUID();
+	public:
+		GUID();
+		~GUID();
 
-        bool IsGlobal() const;
+		bool IsGlobal() const;
 
-        String GetString();
-        const RPC_STR& GetStr();
-        const ::UUID& Get() const;
+		String GetString();
+		const RPC_STR& GetStr();
+		const ::UUID& Get() const;
 
-    private:
-        bool IsGood() const;
+	private:
+		bool IsGood() const;
 
-        ::UUID mUUID {};
-        static inline ::UUID mUUIDDefault {};
+		::UUID mUUID{};
+		static inline ::UUID mUUIDDefault{};
 
-        RPC_STR mUUIDString = nullptr;
-        static inline RPC_STR mUUIDStringDefault = (RPC_STR)TEXT("");
+		RPC_STR mUUIDString = nullptr;
+		static inline RPC_STR mUUIDStringDefault = (RPC_STR)TEXT("");
 
-        ::RPC_STATUS mStatus = 0;
-        bool mIsGlobal = true;
-        bool mUUIDStringTryCreate = false;
-    };
+		::RPC_STATUS mStatus = 0;
+		bool mIsGlobal = true;
+		bool mUUIDStringTryCreate = false;
+	};
 }

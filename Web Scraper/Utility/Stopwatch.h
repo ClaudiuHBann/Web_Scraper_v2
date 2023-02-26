@@ -2,29 +2,29 @@
 
 #include "Shared/String.h"
 
-using namespace Shared;
-
 namespace Utility {
-    class Stopwatch {
-    public:
-        inline Stopwatch() = default;
-        Stopwatch(const String& name, const bool start = false);
+	using namespace Shared;
 
-        size_t Size();
+	class Stopwatch {
+	public:
+		inline Stopwatch() = default;
+		Stopwatch(const String& name, const bool start = false);
 
-        bool Create(const String& name, const bool start = false, const bool overwrite = false);
-        bool Pause(const String& name);
-        bool Resume(const String& name);
-        bool Reset(const String& name, const bool start = true);
-        bool Remove(const String& name);
+		size_t Size();
 
-        nanoseconds GetTimeElapsed(const String& name);
+		bool Create(const String& name, const bool start = false, const bool overwrite = false);
+		bool Pause(const String& name);
+		bool Resume(const String& name);
+		bool Reset(const String& name, const bool start = true);
+		bool Remove(const String& name);
 
-    protected:
-        map<String, pair<steady_clock::time_point, bool>> mStopwatches;
-        //  name         time now/elapsed          running
+		nanoseconds GetTimeElapsed(const String& name);
 
-    private:
-        mutex mMutex;
-    };
+	protected:
+		map<String, pair<steady_clock::time_point, bool>> mStopwatches;
+		//  name         time now/elapsed          running
+
+	private:
+		mutex mMutex;
+	};
 }

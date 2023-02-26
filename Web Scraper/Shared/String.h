@@ -20,7 +20,7 @@ namespace Shared {
     using String = string;
     using StringStream = stringstream;
     using IfStream = ifstream;
-#endif // _UNICODE
+#endif // defined(_UNICODE) || defined(UNICODE)
 
     template <typename T>
     inline String ToString(const T& t) {
@@ -32,7 +32,7 @@ namespace Shared {
             return to_wstring(t);
 #else
             return to_string(t);
-#endif // _UNICODE
+#endif // defined(_UNICODE) || defined(UNICODE)
         }
     }
 

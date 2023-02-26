@@ -2,14 +2,15 @@
 
 #include "Shared/String.h"
 
-using namespace Shared;
 
-#define TRACE_LOCATION_PROCESS_THREAD_ID String(TEXT("PID: ") + ToString(::GetCurrentProcessId()) + TEXT("\tTID: ") + ToString(::GetCurrentThreadId()))
-#define TRACE_LOCATION_FILE_LINE String(String(TEXT(__FILE__)) + TEXT(":") + ToString(__LINE__))
-#define TRACE_LOCATION String(TRACE_LOCATION_PROCESS_THREAD_ID + TEXT("\t") + TRACE_LOCATION_FILE_LINE)
-#define TRACE(strn) Utility::Print<const ::TCHAR*>((TRACE_LOCATION + TEXT("\t\t") + (StringStream() << strn).str()).c_str())
+#define TRACE_LOCATION_PROCESS_THREAD_ID Shared::String(TEXT("PID: ") + Shared::ToString(::GetCurrentProcessId()) + TEXT("\tTID: ") + Shared::ToString(::GetCurrentThreadId()))
+#define TRACE_LOCATION_FILE_LINE Shared::String(Shared::String(TEXT(__FILE__)) + TEXT(":") + Shared::ToString(__LINE__))
+#define TRACE_LOCATION Shared::String(TRACE_LOCATION_PROCESS_THREAD_ID + TEXT("\t") + TRACE_LOCATION_FILE_LINE)
+#define TRACE(strn) Utility::Print<const ::TCHAR*>((TRACE_LOCATION + TEXT("\t\t") + (Shared::StringStream() << strn).str()).c_str())
 
 namespace Utility {
+using namespace Shared;
+
     template<typename Object, typename Iterable>
     void Print(
         const Iterable& iterable,
