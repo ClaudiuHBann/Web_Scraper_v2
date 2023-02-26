@@ -2,94 +2,64 @@
 #include "Parser.h"
 
 namespace Parser {
-    constexpr ::TCHAR QUOTE_CHAR = TEXT('"');
-    constexpr size_t QUOTE_CHAR_SIZE = 1;
+	HTMLParser::HTMLParser() {
+		auto result = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+		mInitialized = result == S_OK || result == S_FALSE || result == RPC_E_CHANGED_MODE;
 
-    constexpr ::TCHAR TAG_OPEN_START = TEXT('<');
-    constexpr size_t TAG_OPEN_START_SIZE = 1;
-    constexpr ::TCHAR TAG_CLOSE_START[] = TEXT("</");
-    constexpr ::TCHAR TAG_OPEN_END = TEXT('>');
-    constexpr ::TCHAR TAG_OPEN_END_SPECIAL[] = TEXT("/>");
-    constexpr size_t TAG_OPEN_END_SPECIAL_SIZE = 2;
-    constexpr ::TCHAR TAG_CLOSE_END = TEXT('>');
+		if (mInitialized)
+		{
+			result = CoCreateInstance(CLSID_HTMLDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IHTMLDocument2, (void**)&mIHTMLDocument2);
+		}
+	}
 
-    constexpr ::TCHAR BLANK_CHARS[] = TEXT(" \t\r\n");
-    const vector<String> TAGS_END { TAG_OPEN_END, TAG_OPEN_END_SPECIAL };
+	HTMLParser::~HTMLParser() {
+		if (mIHTMLDocument2)
+		{
+			mIHTMLDocument2->Release();
+		}
 
-    const vector<String> TAGS_SELF_CLOSED {
-        TEXT("area"),
-        TEXT("base"),
-        TEXT("br"),
-        TEXT("col"),
-        TEXT("embed"),
-        TEXT("hr"),
-        TEXT("img"),
-        TEXT("input"),
-        TEXT("link"),
-        TEXT("meta"),
-        TEXT("param"),
-        TEXT("source"),
-        TEXT("track"),
-        TEXT("wbr")
-    };
+		if (mInitialized)
+		{
+			CoUninitialize();
+		}
+	}
 
-    String FindElementSpecial(const String& data, const String& elementName, const pair<String, String>& elementAttributeValuePairs /* = {} */, const size_t offset /* = 0 */) {
-        /*if (!IsTagSelfClosed(elementName)) {
-            return {};
-        }*/
+	IHTMLDocument2* HTMLParser::GetIHTMLDocument2() {
+		return mIHTMLDocument2;
+	}
 
-        auto elementOpenStart = data.find(TAG_OPEN_START, offset);
-        if (elementOpenStart == String::npos) {
-            return {};
-        }
+	bool HTMLParser::SetHTML(const String& html) {
+		if (!mIHTMLDocument2)
+		{
+			return false;
+		}
 
-        auto elementOpenEnd = data.find(TAG_OPEN_END_SPECIAL, elementOpenStart + elementName.size());
-        if (elementOpenEnd == String::npos) {
-            return {};
-        }
+		CString htmlCString(html.c_str());
 
-        return data.substr(elementOpenStart, elementOpenEnd + TAG_OPEN_END_SPECIAL_SIZE - elementOpenStart);
-    }
+		SAFEARRAY* safeArray = SafeArrayCreateVector(VT_VARIANT, 0, 1);
+		if (!safeArray)
+		{
+			return false;
+		}
 
-    String FindAttributeValue(const String& element, const String& attribute, const size_t offset /* = 0 */) {
-        auto attributePos = element.find(attribute, offset);
-        if (attributePos == String::npos) {
-            return {};
-        }
+		VARIANT* variant{};
+		auto result = SafeArrayAccessData(safeArray, (LPVOID*)&variant);
+		if (!variant)
+		{
+			SafeArrayDestroy(safeArray);
+			return false;
+		}
 
-        auto posValueStart = element.find(QUOTE_CHAR, attributePos + attribute.size());
-        if (posValueStart == String::npos) {
-            return {};
-        }
+		variant->vt = VT_BSTR;
+		variant->bstrVal = htmlCString.AllocSysString();
 
-        auto posValueEnd = element.find(QUOTE_CHAR, posValueStart + QUOTE_CHAR_SIZE);
-        if (posValueEnd == String::npos) {
-            return {};
-        }
+		mIHTMLDocument2->close();
+		result = mIHTMLDocument2->write(safeArray);
 
-        return element.substr(posValueStart, posValueEnd - posValueStart);
-    }
+		SysFreeString(variant->bstrVal);
+		SafeArrayUnaccessData(safeArray);
+		SafeArrayDestroy(safeArray);
 
-    inline String FindElementName(const String& data, const size_t offset = 0) {
-
-    }
-
-    String FindElement(const String& data, const String& elementName, const pair<String, String>& elementAttributeValuePairs /* = {} */, const size_t offset /* = 0 */) {
-        return {};
-    }
-
-    inline bool IsTagSelfClosed(const wstring& elementName) {
-        return ranges::find(TAGS_SELF_CLOSED, elementName) != TAGS_SELF_CLOSED.end();
-    }
-
-    inline pair<wstring, size_t> GetClosest(const wstring& data, const list<wstring>& elements, const size_t offset = 0) {
-        auto it = std::min_element(elements.begin(), elements.end(), [&] (const auto& left, const auto& right) { return data.find(left, offset) < data.find(right, offset); });
-        return { *it, data.find(*it, offset) };
-    }
-
-    inline wstring TrimBlankChars(const wstring& data, const size_t offset = 0) {
-        auto dataStart = data.find_first_not_of(BLANK_CHARS, offset);
-        auto dataEnd = data.find_last_not_of(BLANK_CHARS, dataStart + 1);
-        return data.substr(dataStart, dataEnd - dataStart);
-    }
+		return SUCCEEDED(result);
+	}
 }

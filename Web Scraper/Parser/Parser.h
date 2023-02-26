@@ -5,8 +5,18 @@
 using namespace Shared;
 
 namespace Parser {
-    String FindElementSpecial(const String& data, const String& elementName, const pair<String, String>& elementAttributeValuePairs = {}, const size_t offset = 0);
-    String FindElement(const String& data, const String& elementName, const pair<String, String>& elementAttributeValuePairs = {}, const size_t offset = 0);
+	class HTMLParser
+	{
+	public:
+		HTMLParser();
+		~HTMLParser();
 
-    String FindAttributeValue(const String& element, const String& attribute, const size_t offset = 0);
+		IHTMLDocument2* GetIHTMLDocument2();
+
+		bool SetHTML(const String& html);
+
+	private:
+		bool mInitialized{};
+		IHTMLDocument2* mIHTMLDocument2{};
+	};
 }

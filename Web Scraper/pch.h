@@ -11,6 +11,9 @@
 #include <wininet.h>
 #pragma comment(lib, "Wininet.lib")
 
+#include <Mshtml.h>
+#include<atlstr.h>
+
 
 
 #include <iostream>
