@@ -14,7 +14,6 @@ namespace Scraper {
 
 	class WebScraper
 	{
-
 	public:
 		WebScraper(
 			const String& userAgent = DEFAULT_USER_AGENT,

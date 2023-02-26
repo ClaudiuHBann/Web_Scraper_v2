@@ -4,8 +4,29 @@
 
 namespace Scraper {
 	namespace Progress {
+		InternetStatus::InternetStatus(
+			const function<void(HINTERNET, DWORD_PTR, DWORD, LPVOID, DWORD)>& callback /* = +[](
+				HINTERNET hInternet,
+				DWORD_PTR dwContext,
+				DWORD dwInternetStatus,
+				LPVOID lpvStatusInformation,
+				DWORD dwStatusInformationLength
+				) {
+					TRACE("HINTERNET: " << GetPointerAsHexString(hInternet));
+					TRACE("Context: " << dwContext);
+					TRACE("Status code: " << dwInternetStatus);
+
+					if (lpvStatusInformation)
+					{
+						TRACE("Status info code: " << *(DWORD*)lpvStatusInformation);
+						TRACE("Status info size: " << dwStatusInformationLength);
+					}
+			} */,
+			const DWORD_PTR context /* = *(DWORD_PTR*)DEFAULT_CONTEXT */
+		) : mCallback(callback), mContext(context) {};
+
 		bool InternetStatus::SetInstance(HINTERNET hInternet) const {
-			if (!hInternet || !mCallback)
+			if (!hInternet)
 			{
 				return false;
 			}
