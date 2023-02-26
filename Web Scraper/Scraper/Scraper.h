@@ -34,10 +34,9 @@ namespace Scraper {
 		static future<bool> URLToFileCacheAsync(const String& url, String& file, BindStatus* bindStatus = nullptr);
 
 		// FIXME I think this implementation doesn't support async internet operations
-		template <class _Elem = char, class _Traits = char_traits<_Elem>, class _Alloc = allocator<_Elem>>
-		inline bool URLToString(
+		bool URLToString(
 			const String& url,
-			basic_string<_Elem, _Traits, _Alloc>& str,
+			String& str,
 			const String& header = TEXT(""),
 			const DWORD flagsOpenURL = 0,
 			const InternetStatus* internetStatusOpenURL = nullptr,
@@ -66,13 +65,14 @@ namespace Scraper {
 				return false;
 			}
 
-			auto buffer = new _Elem[mBufferSize];
+			auto buffer = new char[mBufferSize];
 
 			INTERNET_BUFFERS bufferInternet{};
 			bufferInternet.dwStructSize = sizeof(INTERNET_BUFFERS);
 			bufferInternet.lpvBuffer = buffer;
 
 			BOOL result;
+			string strBase;
 			do {
 				bufferInternet.dwBufferLength = mBufferSize;
 
@@ -86,8 +86,13 @@ namespace Scraper {
 					break;
 				}
 
-				str.append(buffer, bufferInternet.dwBufferLength);
+				strBase.append(buffer, bufferInternet.dwBufferLength);
 			} while (true);
+#if defined(_UNICODE) || defined(UNICODE)
+			str = ToStringType<wchar_t>(strBase);
+#else
+			str = move(strBase);
+#endif // defined(_UNICODE) || defined(UNICODE)
 
 			delete[] buffer;
 			if (internetStatusOpenURL)
@@ -99,10 +104,9 @@ namespace Scraper {
 			return result;
 		}
 
-		template <class _Elem = char, class _Traits = char_traits<_Elem>, class _Alloc = allocator<_Elem>>
-		inline future<bool> URLToStringAsync(
+		future<bool> URLToStringAsync(
 			const String& url,
-			basic_string<_Elem, _Traits, _Alloc>& str,
+			String& str,
 			const String& header = TEXT(""),
 			const DWORD flagsOpenURL = 0,
 			const InternetStatus* internetStatusOpenURL = nullptr,
