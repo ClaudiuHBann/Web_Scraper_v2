@@ -87,4 +87,83 @@ namespace Parser {
 
 		mReset = false;
 	}
+
+	/* static */ IHTMLElement* HTMLParser::GetElementFromCollectionByIndex(IHTMLElementCollection*& collection, const long index) {
+		VARIANT variantName{};
+		variantName.vt = VT_UINT;
+		variantName.lVal = index;
+
+		VARIANT variantIndex{};
+		variantIndex.vt = VT_I4;
+		variantIndex.intVal = 0;
+
+		IDispatch* iDispatch{};
+		auto result = collection->item(variantName, variantIndex, &iDispatch);
+		if (FAILED(result))
+		{
+			return nullptr;
+		}
+
+		IHTMLElement* element{};
+		result = iDispatch->QueryInterface(IID_IHTMLElement, (void**)&element);
+		return element;
+	}
+
+	/* static */ bool HTMLParser::ElementHasAttribute(IHTMLElement*& element, const pair<String, String>& attribute) {
+		return GetElementAttributeValueByName(element, attribute.first) == attribute.second;
+	}
+
+	/* static */ bool HTMLParser::ElementHasAttributes(IHTMLElement*& element, const vector<pair<String, String>>& attributes) {
+		for (const auto& attribute : attributes)
+		{
+			if (!ElementHasAttribute(element, attribute))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	vector<IHTMLElement*> HTMLParser::GetElementsByAttributes(const vector<pair<String, String>>& attributes) {
+		IHTMLElementCollection* all{};
+		auto result = mIHTMLDocument2->get_all(&all);
+		if (FAILED(result))
+		{
+			return {};
+		}
+
+		vector<IHTMLElement*> elements{};
+
+		long allLength;
+		all->get_length(&allLength);
+		for (long i = 0; i < allLength; i++)
+		{
+			auto element = GetElementFromCollectionByIndex(all, i);
+			if (element && ElementHasAttributes(element, attributes))
+			{
+				elements.push_back(element);
+			}
+		}
+
+		return elements;
+	}
+
+	/* static */ String HTMLParser::GetElementAttributeValueByName(IHTMLElement*& element, const String& name) {
+		VARIANT variantAttribute{};
+		variantAttribute.vt = VT_BSTR;
+
+		CString attributeNameCString(name.c_str());
+		auto attributeNameBStr = attributeNameCString.AllocSysString();
+
+		auto result = element->getAttribute(attributeNameBStr, 0, &variantAttribute);
+		SysFreeString(attributeNameBStr);
+
+		if (SUCCEEDED(result) && variantAttribute.vt == VT_BSTR) {
+			return variantAttribute.bstrVal;
+		}
+		else {
+			return {};
+		}
+	}
 }

@@ -7,16 +7,23 @@ using namespace Parser;
 
 int main() {
 	WebScraper scraper;
-	InternetStatus scraperEvents;
 
-	String url(TEXT("https://github.com/ClaudiuHBann?tab=repositories"));
-	String urlHTML;
-	if (!scraper.URLToString(url, urlHTML, TEXT(""), 0, &scraperEvents)) {
+	String urlBase(TEXT("https://github.com/ClaudiuHBann"));
+	String url(urlBase + TEXT("?tab=repositories"));
+	String html;
+	if (!scraper.URLToString(url, html)) {
 		return 1;
 	}
 
-	TRACE(urlHTML);
-	HTMLParser parser(urlHTML);
+	HTMLParser parser(html);
+
+	vector<String> repositoriesURLs;
+	for (auto& element : parser.GetElementsByAttributes({ { TEXT("itemprop"), TEXT("name codeRepository") } }))
+	{
+		auto href = parser.GetElementAttributeValueByName(element, TEXT("href"));
+		href = StringUtil::RemoveStringLead(href, TEXT("about:/ClaudiuHBann"));
+		repositoriesURLs.push_back(urlBase + href);
+	}
 
 	return 0;
 }
