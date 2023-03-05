@@ -46,6 +46,10 @@
     <ClInclude Include="Scraper\Progress\InternetStatus.h">
       <Filter>Scraper\Progress</Filter>
     </ClInclude>
+    <ClInclude Include="Utility\Utility.h" />
+    <ClInclude Include="Shared\json.hpp">
+      <Filter>Shared</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Utility\Stopwatch.cpp">
@@ -76,5 +80,6 @@
     <ClCompile Include="Scraper\Progress\InternetStatus.cpp">
       <Filter>Scraper\Progress</Filter>
     </ClCompile>
+    <ClCompile Include="Utility\Utility.cpp" />
   </ItemGroup>
 </Project>

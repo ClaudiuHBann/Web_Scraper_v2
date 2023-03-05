@@ -161,6 +161,7 @@
     <ClInclude Include="Scraper\Progress\InternetStatus.h" />
     <ClInclude Include="Scraper\Scraper.h" />
     <ClInclude Include="Shared\File.h" />
+    <ClInclude Include="Shared\json.hpp" />
     <ClInclude Include="Shared\String.h" />
     <ClInclude Include="Utility\GUID.h" />
     <ClInclude Include="Utility\Logger.h" />
