@@ -1,12 +1,10 @@
 #pragma once
 
 #include "Shared/String.h"
+#include "Progress/BindStatus.h"
 #include "Progress/InternetStatus.h"
 
-class BindStatus;
-
 namespace Scraper {
-	using namespace Shared;
 	using namespace Progress;
 
 	constexpr auto DEFAULT_USER_AGENT = TEXT("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36");
@@ -15,6 +13,8 @@ namespace Scraper {
 	class WebScraper
 	{
 	public:
+		using Callback = function<void(bool)>;
+
 		WebScraper(
 			const String& userAgent = DEFAULT_USER_AGENT,
 			const DWORD accessType = INTERNET_OPEN_TYPE_PRECONFIG,
@@ -28,103 +28,31 @@ namespace Scraper {
 		DWORD GetBufferSize() const;
 
 		static bool URLToFile(const String& url, const String& file, BindStatus* bindStatus = nullptr);
-		static future<bool> URLToFileAsync(const String& url, const String& file, BindStatus* bindStatus = nullptr);
+		static void URLToFileAsync(const String& url, const String& file, BindStatus* bindStatus = nullptr, Callback* callback = nullptr);
 
 		static bool URLToFileCache(const String& url, String& file, BindStatus* bindStatus = nullptr);
-		static future<bool> URLToFileCacheAsync(const String& url, String& file, BindStatus* bindStatus = nullptr);
+		static void URLToFileCacheAsync(const String& url, String& file, BindStatus* bindStatus = nullptr, Callback* callback = nullptr);
 
-		// FIXME I think this implementation doesn't support async internet operations
 		bool URLToString(
 			const String& url,
 			String& str,
+			const InternetStatus* internetStatusOpenURL = nullptr,
 			const String& header = TEXT(""),
 			const DWORD flagsOpenURL = 0,
-			const InternetStatus* internetStatusOpenURL = nullptr,
 			const DWORD flagsReadFileEx = 0,
 			const DWORD_PTR contextReadFileEx = 0
-		) {
-			if (!mHInternetOpen) {
-				return false;
-			}
+		);
 
-			auto hInternetOpenUrl = InternetOpenUrl(
-				mHInternetOpen,
-				url.c_str(),
-				header.empty() ? nullptr : header.c_str(),
-				header.empty() ? 0 : -1L,
-				flagsOpenURL,
-				internetStatusOpenURL ? internetStatusOpenURL->GetContext() : 0
-			);
-			if (!hInternetOpenUrl) {
-				return false;
-			}
-
-			if (internetStatusOpenURL &&
-				!internetStatusOpenURL->SetInstance(hInternetOpenUrl))
-			{
-				return false;
-			}
-
-			auto buffer = new char[mBufferSize];
-
-			INTERNET_BUFFERS bufferInternet{};
-			bufferInternet.dwStructSize = sizeof(INTERNET_BUFFERS);
-			bufferInternet.lpvBuffer = buffer;
-
-			BOOL result;
-			string strBase;
-			do {
-				bufferInternet.dwBufferLength = mBufferSize;
-
-				result = InternetReadFileEx(
-					hInternetOpenUrl,
-					&bufferInternet,
-					flagsReadFileEx,
-					contextReadFileEx
-				);
-				if (!result || !bufferInternet.dwBufferLength) {
-					break;
-				}
-
-				strBase.append(buffer, bufferInternet.dwBufferLength);
-			} while (true);
-#if defined(_UNICODE) || defined(UNICODE)
-			str = ToStringType<wchar_t>(strBase);
-#else
-			str = move(strBase);
-#endif // defined(_UNICODE) || defined(UNICODE)
-
-			delete[] buffer;
-			if (internetStatusOpenURL)
-			{
-				internetStatusOpenURL->ResetInstance(hInternetOpenUrl);
-			}
-			InternetCloseHandle(hInternetOpenUrl);
-
-			return result;
-		}
-
-		future<bool> URLToStringAsync(
+		void URLToStringAsync(
 			const String& url,
 			String& str,
+			const InternetStatus* internetStatusOpenURL = nullptr,
+			Callback* callback = nullptr,
 			const String& header = TEXT(""),
 			const DWORD flagsOpenURL = 0,
-			const InternetStatus* internetStatusOpenURL = nullptr,
 			const DWORD flagsReadFileEx = 0,
 			const DWORD_PTR contextReadFileEx = 0
-		) {
-			return async(launch::async, [=, &str]() {
-				return URLToString(
-					url,
-					str,
-					header,
-					flagsOpenURL,
-					internetStatusOpenURL,
-					flagsReadFileEx,
-					contextReadFileEx
-				);
-				});
-		}
+		);
 
 		~WebScraper() {
 			if (mHInternetOpen)
