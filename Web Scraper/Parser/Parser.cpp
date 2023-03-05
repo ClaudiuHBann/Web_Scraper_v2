@@ -88,6 +88,54 @@ namespace Parser {
 		mReset = false;
 	}
 
+	/* static */ IHTMLElementCollection* HTMLParser::GetElementAllAsCollection(IHTMLElement*& element) {
+		IDispatch* childrenRaw{};
+		auto result = element->get_all(&childrenRaw);
+		if (FAILED(result))
+		{
+			return nullptr;
+		}
+
+		IHTMLElementCollection* children{};
+		result = childrenRaw->QueryInterface(IID_IHTMLElementCollection, reinterpret_cast<void**>(&children));
+		return children;
+	}
+
+	/* static */ vector<IHTMLElement*> HTMLParser::GetElementChildren(IHTMLElement*& element, const vector<pair<String, String>>& attributes /* = {} */) {
+		IDispatch* childrenRaw{};
+		auto result = element->get_children(&childrenRaw);
+		if (FAILED(result))
+		{
+			return {};
+		}
+
+		IHTMLElementCollection* children{};
+		result = childrenRaw->QueryInterface(IID_IHTMLElementCollection, reinterpret_cast<void**>(&children));
+		if (FAILED(result))
+		{
+			return {};
+		}
+
+		return GetCollectionElementsByAttributes(children, attributes);
+	}
+
+	/* static */ vector<IHTMLElement*> HTMLParser::GetCollectionElementsByAttributes(IHTMLElementCollection*& collection, const vector<pair<String, String>>& attributes) {
+		vector<IHTMLElement*> htmlElements{};
+
+		long collectionLength;
+		collection->get_length(&collectionLength);
+		for (long i = 0; i < collectionLength; i++)
+		{
+			auto element = GetElementFromCollectionByIndex(collection, i);
+			if (element && ElementHasAttributes(element, attributes))
+			{
+				htmlElements.push_back(element);
+			}
+		}
+
+		return htmlElements;
+	}
+
 	/* static */ IHTMLElement* HTMLParser::GetElementFromCollectionByIndex(IHTMLElementCollection*& collection, const long index) {
 		VARIANT variantName{};
 		variantName.vt = VT_UINT;
@@ -125,28 +173,45 @@ namespace Parser {
 		return true;
 	}
 
+	String HTMLParser::GetScriptAsString(const long index) {
+		IHTMLElementCollection* scripts{};
+		mIHTMLDocument2->get_scripts(&scripts);
+		if (!scripts)
+		{
+			return {};
+		}
+
+		auto script = GetElementFromCollectionByIndex(scripts, index);
+		if (!script)
+		{
+			return {};
+		}
+
+		BSTR bstr;
+		script->get_innerHTML(&bstr);
+		return bstr;
+	}
+
 	vector<IHTMLElement*> HTMLParser::GetElementsByAttributes(const vector<pair<String, String>>& attributes) {
-		IHTMLElementCollection* all{};
-		auto result = mIHTMLDocument2->get_all(&all);
+		IHTMLElementCollection* collection{};
+		auto result = mIHTMLDocument2->get_all(&collection);
 		if (FAILED(result))
 		{
 			return {};
 		}
 
-		vector<IHTMLElement*> elements{};
+		return GetCollectionElementsByAttributes(collection, attributes);
+	}
 
-		long allLength;
-		all->get_length(&allLength);
-		for (long i = 0; i < allLength; i++)
+	/* static */ vector<IHTMLElement*> HTMLParser::GetElementNthChildrenGeneration(IHTMLElement*& element, long generation) {
+		auto children = GetElementChildren(element);
+
+		while (generation--)
 		{
-			auto element = GetElementFromCollectionByIndex(all, i);
-			if (element && ElementHasAttributes(element, attributes))
-			{
-				elements.push_back(element);
-			}
+			children = GetElementChildren(children.front());
 		}
 
-		return elements;
+		return children;
 	}
 
 	/* static */ String HTMLParser::GetElementAttributeValueByName(IHTMLElement*& element, const String& name) {
@@ -159,7 +224,7 @@ namespace Parser {
 		auto result = element->getAttribute(attributeNameBStr, 0, &variantAttribute);
 		SysFreeString(attributeNameBStr);
 
-		if (SUCCEEDED(result) && variantAttribute.vt == VT_BSTR) {
+		if (SUCCEEDED(result) && variantAttribute.vt == VT_BSTR && variantAttribute.bstrVal) {
 			return variantAttribute.bstrVal;
 		}
 		else {

@@ -15,7 +15,17 @@ namespace Parser {
 
 		vector<IHTMLElement*> GetElementsByAttributes(const vector<pair<String, String>>& attributes);
 
+		static vector<IHTMLElement*> GetCollectionElementsByAttributes(IHTMLElementCollection*& collection, const vector<pair<String, String>>& attributes);
+
+		static vector<IHTMLElement*> GetElementChildren(IHTMLElement*& element, const vector<pair<String, String>>& attributes = {});
+
+		static IHTMLElementCollection* GetElementAllAsCollection(IHTMLElement*& element);
+
 		static String GetElementAttributeValueByName(IHTMLElement*& element, const String& name);
+
+		static vector<IHTMLElement*> GetElementNthChildrenGeneration(IHTMLElement*& element, long generation);
+
+		String GetScriptAsString(const long index);
 
 		IHTMLDocument2* GetIHTMLDocument2();
 
