@@ -15,6 +15,8 @@ namespace Parser {
 
 		vector<IHTMLElement*> GetElementsByAttributes(const vector<pair<String, String>>& attributes);
 
+		static vector<IHTMLElement*> GetElementsByNameFromElements(IHTMLElementCollection*& collection, const String& name);
+
 		static vector<IHTMLElement*> GetCollectionElementsByAttributes(IHTMLElementCollection*& collection, const vector<pair<String, String>>& attributes);
 
 		static vector<IHTMLElement*> GetElementChildren(IHTMLElement*& element, const vector<pair<String, String>>& attributes = {});

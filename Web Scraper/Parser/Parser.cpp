@@ -203,6 +203,26 @@ namespace Parser {
 		return GetCollectionElementsByAttributes(collection, attributes);
 	}
 
+	/* static */ vector<IHTMLElement*> HTMLParser::GetElementsByNameFromElements(IHTMLElementCollection*& collection, const String& name) {
+		vector<IHTMLElement*> elementsWithName;
+
+		long collectionLength;
+		collection->get_length(&collectionLength);
+		for (long i = 0; i < collectionLength; i++)
+		{
+			auto element = GetElementFromCollectionByIndex(collection, i);
+			BSTR bstr;
+			element->get_tagName(&bstr);
+
+			if (bstr == name)
+			{
+				elementsWithName.push_back(element);
+			}
+		}
+
+		return elementsWithName;
+	}
+
 	/* static */ vector<IHTMLElement*> HTMLParser::GetElementNthChildrenGeneration(IHTMLElement*& element, long generation) {
 		auto children = GetElementChildren(element);
 
