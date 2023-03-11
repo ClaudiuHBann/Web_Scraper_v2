@@ -13,7 +13,7 @@ namespace Scraper {
 	class WebScraper
 	{
 	public:
-		using Callback = function<void(bool)>;
+		using Callback = function<void(String)>;
 
 		WebScraper(
 			const String& userAgent = DEFAULT_USER_AGENT,
@@ -31,7 +31,7 @@ namespace Scraper {
 		static void URLToFileAsync(const String& url, const String& file, BindStatus* bindStatus = nullptr, Callback* callback = nullptr);
 
 		static bool URLToFileCache(const String& url, String& file, BindStatus* bindStatus = nullptr);
-		static void URLToFileCacheAsync(const String& url, String& file, BindStatus* bindStatus = nullptr, Callback* callback = nullptr);
+		static void URLToFileCacheAsync(const String& url, BindStatus* bindStatus = nullptr, Callback* callback = nullptr);
 
 		bool URLToString(
 			const String& url,
@@ -45,7 +45,6 @@ namespace Scraper {
 
 		void URLToStringAsync(
 			const String& url,
-			String& str,
 			const InternetStatus* internetStatusOpenURL = nullptr,
 			Callback* callback = nullptr,
 			const String& header = TEXT(""),

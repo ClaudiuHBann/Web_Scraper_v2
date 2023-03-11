@@ -3,6 +3,8 @@
 
 namespace Scraper {
 	/* static */ bool WebScraper::URLToFile(const String& url, const String& file, BindStatus* bindStatus /* = nullptr */) {
+		create_directories(StringUtil::RemoveStringTrail(file, TEXT(R"(\)")));
+
 		return SUCCEEDED(::URLDownloadToFile(nullptr, url.c_str(), file.c_str(), 0, bindStatus));
 	}
 
@@ -16,20 +18,21 @@ namespace Scraper {
 
 	/* static */ void WebScraper::URLToFileAsync(const String& url, const String& file, BindStatus* bindStatus /* = nullptr */, Callback* callback /* = nullptr */) {
 		auto _ = async(launch::async, [=, &bindStatus]() {
-			auto result = URLToFile(url, file, bindStatus);
+			URLToFile(url, file, bindStatus);
 		if (callback)
 		{
-			(*callback)(result);
+			(*callback)(file);
 		}
 			});
 	}
 
-	/* static */ void WebScraper::URLToFileCacheAsync(const String& url, String& file, BindStatus* bindStatus /* = nullptr */, Callback* callback /* = nullptr */) {
+	/* static */ void WebScraper::URLToFileCacheAsync(const String& url, BindStatus* bindStatus /* = nullptr */, Callback* callback /* = nullptr */) {
 		auto _ = async(launch::async, [&, url]() {
-			auto result = URLToFileCache(url, file, bindStatus);
+			String file;
+		URLToFileCache(url, file, bindStatus);
 		if (callback)
 		{
-			(*callback)(result);
+			(*callback)(file);
 		}
 			});
 	}
@@ -106,7 +109,6 @@ namespace Scraper {
 
 	void WebScraper::URLToStringAsync(
 		const String& url,
-		String& str,
 		const InternetStatus* internetStatusOpenURL /* = nullptr */,
 		Callback* callback /* = nullptr */,
 		const String& header /* = TEXT("") */,
@@ -114,20 +116,21 @@ namespace Scraper {
 		const DWORD flagsReadFileEx /* = 0 */,
 		const DWORD_PTR contextReadFileEx /* = 0 */
 	) {
-		auto _ = async(launch::async, [=, &str]() {
-			auto result = URLToString(
-				url,
-				str,
-				internetStatusOpenURL,
-				header,
-				flagsOpenURL,
-				flagsReadFileEx,
-				contextReadFileEx
-			);
+		auto _ = async(launch::async, [=]() {
+			String str;
+		URLToString(
+			url,
+			str,
+			internetStatusOpenURL,
+			header,
+			flagsOpenURL,
+			flagsReadFileEx,
+			contextReadFileEx
+		);
 
 		if (callback)
 		{
-			(*callback)(result);
+			(*callback)(str);
 		}
 			});
 	}
