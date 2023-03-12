@@ -45,6 +45,7 @@ void GetSourcesAndFiles(const String& html, const String& hrefStr, const String&
 	parserThread.Parse(HTMLParser::GetElementInnerHTML(threadElement));
 
 	auto threadImgs = parserThread.GetElementsByTagNameFromCollection(TEXT("IMG"));
+	Utility::GUID guid;
 
 	long length {};
 	threadImgs->get_length(&length);
@@ -61,7 +62,13 @@ void GetSourcesAndFiles(const String& html, const String& hrefStr, const String&
 		srcs.push_back(srcFull);
 
 		auto fileName = Utility::GUID().GetString() + TEXT(".") + File(srcFull).GetFileExtension();
-		auto file = DIRECTORY_4CHAN_BASE + File::MakeFileNameValid(nameStr) + TEXT(R"(\)") + fileName;
+		auto file = DIRECTORY_4CHAN_BASE;
+		if (File::IsFileNameValid(nameStr)) {
+			file += File::MakeFileNameValid(nameStr);
+		} else {
+			file += guid.GetString();
+		}
+		file += TEXT(R"(\)") + fileName;
 		files.push_back(file);
 	}
 }
@@ -76,7 +83,7 @@ int _tmain(int, wchar_t** argv) {
 	String htmlCatalog;
 	atomic filesCurrent = 0, filesTotal = 0;
 
-	InternetStatus callbackScraper(+[] (HINTERNET, DWORD_PTR, DWORD, LPVOID, DWORD) {});
+	InternetStatus callbackScraper;
 	BindStatus bindStatus;
 	WebScraper::CallbackRaw callbackURL = [&] (const auto& html) {
 		HTMLParser parser;
@@ -88,9 +95,8 @@ int _tmain(int, wchar_t** argv) {
 		for (auto href = threadHrefs.begin(), name = threadNames.begin(); href != threadHrefs.end() && name != threadNames.end(); href++, name++) {
 			thread([&, hrefStr = *href, nameStr = *name] () {
 				auto callbackHref = make_shared<WebScraper::CallbackRaw>([&, hrefStr, nameStr] (const auto& htmlHref) {
-					   auto callbackFile = make_shared<WebScraper::CallbackRaw>([&] (const auto&) {
-																			 filesCurrent++;
-																				});
+					   auto callbackFile = make_shared<WebScraper::CallbackRaw>([&] (const auto&) { filesCurrent++; });
+
 			vector<String> srcs, files;
 			GetSourcesAndFiles(htmlHref, hrefStr, nameStr, filesTotal, srcs, files);
 			for (auto src = srcs.begin(), file = files.begin(); src != srcs.end() && file != files.end(); src++, file++) {

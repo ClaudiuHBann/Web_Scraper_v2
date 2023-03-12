@@ -14,6 +14,7 @@ namespace Shared {
 		static String ReadAllText(const String& file);
 
 		static String MakeFileNameValid(const String& fileName);
+		static bool IsFileNameValid(const String& fileName);
 
 		String GetFileExtension();
 

@@ -5,6 +5,8 @@
 namespace Shared {
 	using namespace Utility;
 
+	static const String FILE_NAME_ILLEGAL_CHARS_STR(FILE_NAME_ILLEGAL_CHARS);
+
 	/* static */ bool File::Exists(const String& file) {
 		return exists(file);
 	}
@@ -18,30 +20,39 @@ namespace Shared {
 		return String((istreambuf_iterator<::TCHAR>(stream)), istreambuf_iterator<::TCHAR>());
 	}
 
-	File::File(const String& file) :mFile(file) {}
+	File::File(const String& file) :mFile(file) {
+	}
 
 	String File::GetFileExtension() {
 		return StringUtil::StringTrail(mFile, TEXT("."));
 	}
 
 	/* static */ String File::MakeFileNameValid(const String& fileName) {
-		static const String FILE_NAME_ILLEGAL_CHARS_STR(FILE_NAME_ILLEGAL_CHARS);
-		String fileNameNew{};
+		String fileNameNew {};
 
-		for (const auto& c : fileName)
-		{
-			if (FILE_NAME_ILLEGAL_CHARS_STR.find(c) == String::npos)
-			{
+		for (const auto& c : fileName) {
+			if (FILE_NAME_ILLEGAL_CHARS_STR.find(c) == String::npos) {
 				fileNameNew.push_back(c);
 			}
 		}
 
-		if (!fileNameNew.size())
-		{
+		if (!fileNameNew.size()) {
 			Utility::GUID guid;
 			fileNameNew = guid.GetString();
 		}
 
 		return fileNameNew;
+	}
+
+	/* static */ bool File::IsFileNameValid(const String& fileName) {
+		String fileNameNew {};
+
+		for (const auto& c : fileName) {
+			if (FILE_NAME_ILLEGAL_CHARS_STR.find(c) == String::npos) {
+				fileNameNew.push_back(c);
+			}
+		}
+
+		return fileNameNew.size();
 	}
 }
