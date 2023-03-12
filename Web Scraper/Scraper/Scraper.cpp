@@ -17,24 +17,22 @@ namespace Scraper {
 	}
 
 	/* static */ void WebScraper::URLToFileAsync(const String& url, const String& file, BindStatus* bindStatus /* = nullptr */, Callback* callback /* = nullptr */) {
-		auto _ = async(launch::async, [=, &bindStatus]() {
+		auto _ = async(launch::async, [=, &bindStatus] () {
 			URLToFile(url, file, bindStatus);
-		if (callback)
-		{
-			(*callback)(file);
+		if (callback) {
+			(**callback)(file);
 		}
-			});
+					   });
 	}
 
 	/* static */ void WebScraper::URLToFileCacheAsync(const String& url, BindStatus* bindStatus /* = nullptr */, Callback* callback /* = nullptr */) {
-		auto _ = async(launch::async, [&, url]() {
+		auto _ = async(launch::async, [&, url] () {
 			String file;
 		URLToFileCache(url, file, bindStatus);
-		if (callback)
-		{
-			(*callback)(file);
+		if (callback) {
+			(**callback)(file);
 		}
-			});
+					   });
 	}
 
 	bool WebScraper::URLToString(
@@ -63,14 +61,13 @@ namespace Scraper {
 		}
 
 		if (internetStatusOpenURL &&
-			!internetStatusOpenURL->SetInstance(hInternetOpenUrl))
-		{
+			!internetStatusOpenURL->SetInstance(hInternetOpenUrl)) {
 			return false;
 		}
 
 		auto buffer = new char[mBufferSize];
 
-		INTERNET_BUFFERS bufferInternet{};
+		INTERNET_BUFFERS bufferInternet {};
 		bufferInternet.dwStructSize = sizeof(INTERNET_BUFFERS);
 		bufferInternet.lpvBuffer = buffer;
 
@@ -98,8 +95,7 @@ namespace Scraper {
 #endif // defined(_UNICODE) || defined(UNICODE)
 
 		delete[] buffer;
-		if (internetStatusOpenURL)
-		{
+		if (internetStatusOpenURL) {
 			internetStatusOpenURL->ResetInstance(hInternetOpenUrl);
 		}
 		InternetCloseHandle(hInternetOpenUrl);
@@ -116,7 +112,7 @@ namespace Scraper {
 		const DWORD flagsReadFileEx /* = 0 */,
 		const DWORD_PTR contextReadFileEx /* = 0 */
 	) {
-		auto _ = async(launch::async, [=]() {
+		auto _ = async(launch::async, [=] () {
 			String str;
 		URLToString(
 			url,
@@ -128,11 +124,37 @@ namespace Scraper {
 			contextReadFileEx
 		);
 
-		if (callback)
-		{
-			(*callback)(str);
+		if (callback) {
+			(**callback)(str);
 		}
-			});
+					   });
+	}
+
+	void WebScraper::URLToStringAsync(
+		const String& url,
+		const InternetStatus* internetStatusOpenURL /* = nullptr */,
+		CallbackRaw* callbackRaw /* = nullptr */,
+		const String& header /* = TEXT("") */,
+		const DWORD flagsOpenURL /* = 0 */,
+		const DWORD flagsReadFileEx /* = 0 */,
+		const DWORD_PTR contextReadFileEx /* = 0 */
+	) {
+		auto _ = async(launch::async, [=] () {
+			String str;
+		URLToString(
+			url,
+			str,
+			internetStatusOpenURL,
+			header,
+			flagsOpenURL,
+			flagsReadFileEx,
+			contextReadFileEx
+		);
+
+		if (callbackRaw) {
+			(*callbackRaw)(str);
+		}
+					   });
 	}
 
 	WebScraper::WebScraper(

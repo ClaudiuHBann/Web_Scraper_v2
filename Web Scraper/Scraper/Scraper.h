@@ -10,10 +10,10 @@ namespace Scraper {
 	constexpr auto DEFAULT_USER_AGENT = TEXT("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36");
 	constexpr auto DEFAULT_BUFFER_SIZE = 8192;
 
-	class WebScraper
-	{
+	class WebScraper {
 	public:
-		using Callback = function<void(String)>;
+		using Callback = shared_ptr<function<void(String)>>;
+		using CallbackRaw = function<void(String)>;
 
 		WebScraper(
 			const String& userAgent = DEFAULT_USER_AGENT,
@@ -46,6 +46,16 @@ namespace Scraper {
 		void URLToStringAsync(
 			const String& url,
 			const InternetStatus* internetStatusOpenURL = nullptr,
+			CallbackRaw* callbackRaw = nullptr,
+			const String& header = TEXT(""),
+			const DWORD flagsOpenURL = 0,
+			const DWORD flagsReadFileEx = 0,
+			const DWORD_PTR contextReadFileEx = 0
+		);
+
+		void URLToStringAsync(
+			const String& url,
+			const InternetStatus* internetStatusOpenURL = nullptr,
 			Callback* callback = nullptr,
 			const String& header = TEXT(""),
 			const DWORD flagsOpenURL = 0,
@@ -54,14 +64,13 @@ namespace Scraper {
 		);
 
 		~WebScraper() {
-			if (mHInternetOpen)
-			{
+			if (mHInternetOpen) {
 				InternetCloseHandle(mHInternetOpen);
 			}
 		}
 
 	private:
-		HINTERNET mHInternetOpen{};
+		HINTERNET mHInternetOpen {};
 		atomic<DWORD> mBufferSize = DEFAULT_BUFFER_SIZE;
 	};
 }
