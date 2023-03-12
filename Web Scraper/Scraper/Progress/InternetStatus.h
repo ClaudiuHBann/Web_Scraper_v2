@@ -23,8 +23,7 @@ namespace Scraper {
 						TRACE("Context: " << dwContext);
 						TRACE("Status code: " << dwInternetStatus);
 
-						if (lpvStatusInformation)
-						{
+						if (lpvStatusInformation) {
 							TRACE("Status info code: " << *(DWORD*)lpvStatusInformation);
 							TRACE("Status info size: " << dwStatusInformationLength);
 						}
@@ -42,8 +41,8 @@ namespace Scraper {
 			void SetContext(const DWORD_PTR context);
 
 		private:
-			function<void(HINTERNET, DWORD_PTR, DWORD, LPVOID, DWORD)> mCallback{};
-			DWORD_PTR mContext{};
+			function<void(HINTERNET, DWORD_PTR, DWORD, LPVOID, DWORD)> mCallback {};
+			DWORD_PTR mContext {};
 		};
 	}
 }

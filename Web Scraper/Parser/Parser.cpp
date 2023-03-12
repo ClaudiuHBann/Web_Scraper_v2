@@ -2,157 +2,97 @@
 #include "Parser.h"
 
 namespace Parser {
-	HTMLParser::HTMLParser(const String& html /* = {} */) {
-		auto result = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-		mInitialized = result == S_OK || result == S_FALSE || result == RPC_E_CHANGED_MODE;
+	thread_local size_t HTMLParserInstanceCount = 0;
 
-		if (mInitialized)
-		{
-			result = CoCreateInstance(CLSID_HTMLDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IHTMLDocument2, (void**)&mIHTMLDocument2);
-			if (!html.empty() && SUCCEEDED(result))
-			{
-				SetHTML(html);
+	HTMLParser::HTMLParser() {
+		if (!HTMLParserInstanceCount++) {
+			auto result = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+			if (result != S_OK && result != S_FALSE && result != RPC_E_CHANGED_MODE) {
+				HTMLParserInstanceCount--;
 			}
 		}
 	}
 
 	HTMLParser::~HTMLParser() {
-		Reset();
+		Uninitialize3();
+		Uninitialize2();
 
-		if (mIHTMLDocument2)
-		{
-			mIHTMLDocument2->Release();
-		}
-
-		if (mInitialized)
-		{
+		if (!--HTMLParserInstanceCount) {
 			CoUninitialize();
 		}
 	}
 
 	IHTMLDocument2* HTMLParser::GetIHTMLDocument2() {
+		Initialize2();
+
 		return mIHTMLDocument2;
 	}
 
-	bool HTMLParser::SetHTML(const String& html) {
-		if (!mIHTMLDocument2)
-		{
+	IHTMLDocument3* HTMLParser::GetIHTMLDocument3() {
+		Initialize3();
+
+		return mIHTMLDocument3;
+	}
+
+	bool HTMLParser::Parse(const String& html) {
+		if (!Initialize2()) {
 			return false;
 		}
-
-		Reset();
 
 		CString htmlCString(html.c_str());
 
-		mSafeArray = SafeArrayCreateVector(VT_VARIANT, 0, 1);
-		if (!mSafeArray)
-		{
+		auto safeArray = SafeArrayCreateVector(VT_VARIANT, 0, 1);
+		if (!safeArray) {
 			return false;
 		}
 
-		auto result = SafeArrayAccessData(mSafeArray, (LPVOID*)&mVariant);
-		if (!mVariant)
-		{
-			SafeArrayDestroy(mSafeArray);
+		VARIANT* variant {};
+		auto result = SafeArrayAccessData(safeArray, (void**)&variant);
+		if (!variant) {
+			SafeArrayDestroy(safeArray);
 			return false;
 		}
 
-		mVariant->vt = VT_BSTR;
-		mVariant->bstrVal = htmlCString.AllocSysString();
+		variant->vt = VT_BSTR;
+		variant->bstrVal = htmlCString.AllocSysString();
 
-		result = mIHTMLDocument2->write(mSafeArray);
+		result = mIHTMLDocument2->write(safeArray);
+		mIHTMLDocument2->close();
 
-		mReset = true;
+		SysFreeString(variant->bstrVal);
+		SafeArrayDestroy(safeArray);
+
 		return SUCCEEDED(result);
 	}
 
-	void HTMLParser::Reset() {
-		if (!mReset)
-		{
-			return;
-		}
-
-		mIHTMLDocument2->close();
-
-		if (mVariant && mVariant->bstrVal)
-		{
-			SysFreeString(mVariant->bstrVal);
-		}
-
-		if (mSafeArray)
-		{
-			//SafeArrayUnaccessData(mSafeArray);
-			SafeArrayDestroy(mSafeArray);
-		}
-
-		mReset = false;
-	}
-
 	/* static */ IHTMLElementCollection* HTMLParser::GetElementAllAsCollection(IHTMLElement*& element) {
-		IDispatch* childrenRaw{};
+		IDispatch* childrenRaw {};
 		auto result = element->get_all(&childrenRaw);
-		if (FAILED(result))
-		{
+		if (FAILED(result)) {
 			return nullptr;
 		}
 
-		IHTMLElementCollection* children{};
+		IHTMLElementCollection* children {};
 		result = childrenRaw->QueryInterface(IID_IHTMLElementCollection, reinterpret_cast<void**>(&children));
 		return children;
 	}
 
-	/* static */ vector<IHTMLElement*> HTMLParser::GetElementChildren(IHTMLElement*& element, const vector<pair<String, String>>& attributes /* = {} */) {
-		IDispatch* childrenRaw{};
-		auto result = element->get_children(&childrenRaw);
-		if (FAILED(result))
-		{
-			return {};
-		}
-
-		IHTMLElementCollection* children{};
-		result = childrenRaw->QueryInterface(IID_IHTMLElementCollection, reinterpret_cast<void**>(&children));
-		if (FAILED(result))
-		{
-			return {};
-		}
-
-		return GetCollectionElementsByAttributes(children, attributes);
-	}
-
-	/* static */ vector<IHTMLElement*> HTMLParser::GetCollectionElementsByAttributes(IHTMLElementCollection*& collection, const vector<pair<String, String>>& attributes) {
-		vector<IHTMLElement*> htmlElements{};
-
-		long collectionLength;
-		collection->get_length(&collectionLength);
-		for (long i = 0; i < collectionLength; i++)
-		{
-			auto element = GetElementFromCollectionByIndex(collection, i);
-			if (element && ElementHasAttributes(element, attributes))
-			{
-				htmlElements.push_back(element);
-			}
-		}
-
-		return htmlElements;
-	}
-
 	/* static */ IHTMLElement* HTMLParser::GetElementFromCollectionByIndex(IHTMLElementCollection*& collection, const long index) {
-		VARIANT variantName{};
+		VARIANT variantName {};
 		variantName.vt = VT_UINT;
 		variantName.lVal = index;
 
-		VARIANT variantIndex{};
+		VARIANT variantIndex {};
 		variantIndex.vt = VT_I4;
 		variantIndex.intVal = 0;
 
-		IDispatch* iDispatch{};
+		IDispatch* iDispatch {};
 		auto result = collection->item(variantName, variantIndex, &iDispatch);
-		if (FAILED(result))
-		{
+		if (FAILED(result)) {
 			return nullptr;
 		}
 
-		IHTMLElement* element{};
+		IHTMLElement* element {};
 		result = iDispatch->QueryInterface(IID_IHTMLElement, (void**)&element);
 		return element;
 	}
@@ -162,10 +102,8 @@ namespace Parser {
 	}
 
 	/* static */ bool HTMLParser::ElementHasAttributes(IHTMLElement*& element, const vector<pair<String, String>>& attributes) {
-		for (const auto& attribute : attributes)
-		{
-			if (!ElementHasAttribute(element, attribute))
-			{
+		for (const auto& attribute : attributes) {
+			if (!ElementHasAttribute(element, attribute)) {
 				return false;
 			}
 		}
@@ -174,68 +112,69 @@ namespace Parser {
 	}
 
 	String HTMLParser::GetScriptAsString(const long index) {
-		IHTMLElementCollection* scripts{};
+		IHTMLElementCollection* scripts {};
 		mIHTMLDocument2->get_scripts(&scripts);
-		if (!scripts)
-		{
+		if (!scripts) {
 			return {};
 		}
 
 		auto script = GetElementFromCollectionByIndex(scripts, index);
-		if (!script)
-		{
+		if (!script) {
 			return {};
 		}
 
+		return GetElementInnerHTML(script);
+	}
+
+	/* static */ String HTMLParser::GetElementInnerHTML(IHTMLElement*& element) {
 		BSTR bstr;
-		script->get_innerHTML(&bstr);
+		element->get_innerHTML(&bstr);
 		return bstr;
 	}
 
+	IHTMLElement* HTMLParser::GetElementById(const String& id) {
+		BSTR bStr = SysAllocString(id.c_str());
+		IHTMLElement* element {};
+		GetIHTMLDocument3()->getElementById(bStr, &element);
+		SysFreeString(bStr);
+		return element;
+	}
+
 	vector<IHTMLElement*> HTMLParser::GetElementsByAttributes(const vector<pair<String, String>>& attributes) {
-		IHTMLElementCollection* collection{};
+		IHTMLElementCollection* collection {};
 		auto result = mIHTMLDocument2->get_all(&collection);
-		if (FAILED(result))
-		{
+		if (FAILED(result)) {
 			return {};
 		}
 
 		return GetCollectionElementsByAttributes(collection, attributes);
 	}
 
-	/* static */ vector<IHTMLElement*> HTMLParser::GetElementsByNameFromElements(IHTMLElementCollection*& collection, const String& name) {
-		vector<IHTMLElement*> elementsWithName;
+	/* static */ vector<IHTMLElement*> HTMLParser::GetCollectionElementsByAttributes(IHTMLElementCollection*& collection, const vector<pair<String, String>>& attributes) {
+		vector<IHTMLElement*> htmlElements {};
 
 		long collectionLength;
 		collection->get_length(&collectionLength);
-		for (long i = 0; i < collectionLength; i++)
-		{
+		for (long i = 0; i < collectionLength; i++) {
 			auto element = GetElementFromCollectionByIndex(collection, i);
-			BSTR bstr;
-			element->get_tagName(&bstr);
-
-			if (bstr == name)
-			{
-				elementsWithName.push_back(element);
+			if (element && ElementHasAttributes(element, attributes)) {
+				htmlElements.push_back(element);
 			}
 		}
 
-		return elementsWithName;
+		return htmlElements;
 	}
 
-	/* static */ vector<IHTMLElement*> HTMLParser::GetElementNthChildrenGeneration(IHTMLElement*& element, long generation) {
-		auto children = GetElementChildren(element);
-
-		while (generation--)
-		{
-			children = GetElementChildren(children.front());
-		}
-
-		return children;
+	IHTMLElementCollection* HTMLParser::GetElementsByTagNameFromCollection(const String& name) {
+		BSTR bStr = SysAllocString(name.c_str());
+		IHTMLElementCollection* collection {};
+		GetIHTMLDocument3()->getElementsByTagName(bStr, &collection);
+		SysFreeString(bStr);
+		return collection;
 	}
 
 	/* static */ String HTMLParser::GetElementAttributeValueByName(IHTMLElement*& element, const String& name) {
-		VARIANT variantAttribute{};
+		VARIANT variantAttribute {};
 		variantAttribute.vt = VT_BSTR;
 
 		CString attributeNameCString(name.c_str());
@@ -246,9 +185,48 @@ namespace Parser {
 
 		if (SUCCEEDED(result) && variantAttribute.vt == VT_BSTR && variantAttribute.bstrVal) {
 			return variantAttribute.bstrVal;
-		}
-		else {
+		} else {
 			return {};
 		}
+	}
+
+	bool HTMLParser::Initialize2() {
+		if (!HTMLParserInstanceCount) {
+			return false;
+		}
+
+		if (mIHTMLDocument2) {
+			return true;
+		}
+
+		return SUCCEEDED(CoCreateInstance(CLSID_HTMLDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IHTMLDocument2, (void**)&mIHTMLDocument2));
+	}
+
+	bool HTMLParser::Uninitialize2() {
+		if (!mIHTMLDocument2) {
+			return true;
+		}
+
+		return !mIHTMLDocument2->Release();
+	}
+
+	bool HTMLParser::Initialize3() {
+		if (!Initialize2()) {
+			return false;
+		}
+
+		if (mIHTMLDocument3) {
+			return true;
+		}
+
+		return SUCCEEDED(mIHTMLDocument2->QueryInterface(IID_IHTMLDocument3, (void**)&mIHTMLDocument3));
+	}
+
+	bool HTMLParser::Uninitialize3() {
+		if (!mIHTMLDocument3) {
+			return true;
+		}
+
+		return !mIHTMLDocument3->Release();
 	}
 }

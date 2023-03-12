@@ -5,44 +5,39 @@
 namespace Parser {
 	using namespace Shared;
 
-	class HTMLParser
-	{
+	class HTMLParser {
 	public:
-		HTMLParser(const String& html = {});
+		HTMLParser();
 		~HTMLParser();
 
-		bool SetHTML(const String& html);
+		bool Parse(const String& html);
 
+		IHTMLElement* GetElementById(const String& id);
 		vector<IHTMLElement*> GetElementsByAttributes(const vector<pair<String, String>>& attributes);
+		IHTMLElementCollection* GetElementsByTagNameFromCollection(const String& name);
 
-		static vector<IHTMLElement*> GetElementsByNameFromElements(IHTMLElementCollection*& collection, const String& name);
-
-		static vector<IHTMLElement*> GetCollectionElementsByAttributes(IHTMLElementCollection*& collection, const vector<pair<String, String>>& attributes);
-
-		static vector<IHTMLElement*> GetElementChildren(IHTMLElement*& element, const vector<pair<String, String>>& attributes = {});
-
+		static String GetElementInnerHTML(IHTMLElement*& element);
+		static IHTMLElement* GetElementFromCollectionByIndex(IHTMLElementCollection*& collection, const long index);
 		static IHTMLElementCollection* GetElementAllAsCollection(IHTMLElement*& element);
-
+		static vector<IHTMLElement*> GetCollectionElementsByAttributes(IHTMLElementCollection*& collection, const vector<pair<String, String>>& attributes);
 		static String GetElementAttributeValueByName(IHTMLElement*& element, const String& name);
 
-		static vector<IHTMLElement*> GetElementNthChildrenGeneration(IHTMLElement*& element, long generation);
+		static bool ElementHasAttribute(IHTMLElement*& element, const pair<String, String>& attribute);
+		static bool ElementHasAttributes(IHTMLElement*& element, const vector<pair<String, String>>& attributes);
 
 		String GetScriptAsString(const long index);
 
 		IHTMLDocument2* GetIHTMLDocument2();
+		IHTMLDocument3* GetIHTMLDocument3();
 
 	private:
-		bool mInitialized{};
-		bool mReset{};
-		SAFEARRAY* mSafeArray{};
-		VARIANT* mVariant{};
-		IHTMLDocument2* mIHTMLDocument2{};
+		IHTMLDocument2* mIHTMLDocument2 {};
+		IHTMLDocument3* mIHTMLDocument3 {};
 
-		void Reset();
+		bool Initialize2();
+		bool Uninitialize2();
 
-		static IHTMLElement* GetElementFromCollectionByIndex(IHTMLElementCollection*& collection, const long index);
-
-		static bool ElementHasAttribute(IHTMLElement*& element, const pair<String, String>& attribute);
-		static bool ElementHasAttributes(IHTMLElement*& element, const vector<pair<String, String>>& attributes);
+		bool Initialize3();
+		bool Uninitialize3();
 	};
 }
