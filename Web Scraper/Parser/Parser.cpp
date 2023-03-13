@@ -34,6 +34,12 @@ namespace Parser {
 		return mIHTMLDocument3;
 	}
 
+	IHTMLDocument7* HTMLParser::GetIHTMLDocument7() {
+		Initialize7();
+
+		return mIHTMLDocument7;
+	}
+
 	bool HTMLParser::Parse(const String& html) {
 		if (!Initialize2()) {
 			return false;
@@ -65,7 +71,11 @@ namespace Parser {
 		return SUCCEEDED(result);
 	}
 
-	/* static */ IHTMLElementCollection* HTMLParser::GetElementAllAsCollection(IHTMLElement*& element) {
+	/* static */ IHTMLElementCollection* HTMLParser::GetElementAllAsCollection(IHTMLElement* element) {
+		if (!element) {
+			return nullptr;
+		}
+
 		IDispatch* childrenRaw {};
 		auto result = element->get_all(&childrenRaw);
 		if (FAILED(result)) {
@@ -77,7 +87,11 @@ namespace Parser {
 		return children;
 	}
 
-	/* static */ IHTMLElement* HTMLParser::GetElementFromCollectionByIndex(IHTMLElementCollection*& collection, const long index) {
+	/* static */ IHTMLElement* HTMLParser::GetElementFromCollectionByIndex(IHTMLElementCollection* collection, const long index) {
+		if (!collection) {
+			return nullptr;
+		}
+
 		VARIANT variantName {};
 		variantName.vt = VT_UINT;
 		variantName.lVal = index;
@@ -88,7 +102,7 @@ namespace Parser {
 
 		IDispatch* iDispatch {};
 		auto result = collection->item(variantName, variantIndex, &iDispatch);
-		if (FAILED(result)) {
+		if (!iDispatch) {
 			return nullptr;
 		}
 
@@ -97,11 +111,19 @@ namespace Parser {
 		return element;
 	}
 
-	/* static */ bool HTMLParser::ElementHasAttribute(IHTMLElement*& element, const pair<String, String>& attribute) {
+	/* static */ bool HTMLParser::ElementHasAttribute(IHTMLElement* element, const pair<String, String>& attribute) {
+		if (!element) {
+			return false;
+		}
+
 		return GetElementAttributeValueByName(element, attribute.first) == attribute.second;
 	}
 
-	/* static */ bool HTMLParser::ElementHasAttributes(IHTMLElement*& element, const vector<pair<String, String>>& attributes) {
+	/* static */ bool HTMLParser::ElementHasAttributes(IHTMLElement* element, const vector<pair<String, String>>& attributes) {
+		if (!element) {
+			return false;
+		}
+
 		for (const auto& attribute : attributes) {
 			if (!ElementHasAttribute(element, attribute)) {
 				return false;
@@ -126,7 +148,11 @@ namespace Parser {
 		return GetElementInnerHTML(script);
 	}
 
-	/* static */ String HTMLParser::GetElementInnerHTML(IHTMLElement*& element) {
+	/* static */ String HTMLParser::GetElementInnerHTML(IHTMLElement* element) {
+		if (!element) {
+			return String();
+		}
+
 		BSTR bstr;
 		element->get_innerHTML(&bstr);
 		return bstr;
@@ -150,7 +176,11 @@ namespace Parser {
 		return GetCollectionElementsByAttributes(collection, attributes);
 	}
 
-	/* static */ vector<IHTMLElement*> HTMLParser::GetCollectionElementsByAttributes(IHTMLElementCollection*& collection, const vector<pair<String, String>>& attributes) {
+	/* static */ vector<IHTMLElement*> HTMLParser::GetCollectionElementsByAttributes(IHTMLElementCollection* collection, const vector<pair<String, String>>& attributes) {
+		if (!collection) {
+			return {};
+		}
+
 		vector<IHTMLElement*> htmlElements {};
 
 		long collectionLength;
@@ -165,15 +195,19 @@ namespace Parser {
 		return htmlElements;
 	}
 
-	IHTMLElementCollection* HTMLParser::GetElementsByTagNameFromCollection(const String& name) {
+	IHTMLElementCollection* HTMLParser::GetElementsByClassName(const String& name) {
 		BSTR bStr = SysAllocString(name.c_str());
 		IHTMLElementCollection* collection {};
-		GetIHTMLDocument3()->getElementsByTagName(bStr, &collection);
+		GetIHTMLDocument7()->getElementsByClassName(bStr, &collection);
 		SysFreeString(bStr);
 		return collection;
 	}
 
-	/* static */ String HTMLParser::GetElementAttributeValueByName(IHTMLElement*& element, const String& name) {
+	/* static */ String HTMLParser::GetElementAttributeValueByName(IHTMLElement* element, const String& name) {
+		if (!element) {
+			return String();
+		}
+
 		VARIANT variantAttribute {};
 		variantAttribute.vt = VT_BSTR;
 
@@ -228,5 +262,25 @@ namespace Parser {
 		}
 
 		return !mIHTMLDocument3->Release();
+	}
+
+	bool HTMLParser::Initialize7() {
+		if (!Initialize2()) {
+			return false;
+		}
+
+		if (mIHTMLDocument7) {
+			return true;
+		}
+
+		return SUCCEEDED(mIHTMLDocument2->QueryInterface(IID_IHTMLDocument7, (void**)&mIHTMLDocument7));
+	}
+
+	bool HTMLParser::Uninitialize7() {
+		if (!mIHTMLDocument7) {
+			return true;
+		}
+
+		return !mIHTMLDocument7->Release();
 	}
 }

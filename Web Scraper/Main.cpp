@@ -44,24 +44,20 @@ void GetSourcesAndFiles(const String& html, const String& hrefStr, const String&
 	HTMLParser parserThread;
 	parserThread.Parse(HTMLParser::GetElementInnerHTML(threadElement));
 
-	auto threadImgs = parserThread.GetElementsByTagNameFromCollection(TEXT("IMG"));
+	auto threadAs = parserThread.GetElementsByClassName(TEXT("fileThumb"));
 	Utility::GUID guid;
 
 	long length {};
-	threadImgs->get_length(&length);
+	threadAs->get_length(&length);
 	filesTotal += (int)length;
 	for (long i = 0; i < length; i++) {
-		auto threadImg = HTMLParser::GetElementFromCollectionByIndex(threadImgs, i);
+		auto threadA = HTMLParser::GetElementFromCollectionByIndex(threadAs, i);
 
-		auto src = HTMLParser::GetElementAttributeValueByName(threadImg, TEXT("src"));
-		auto srcExtension = File(src).GetFileExtension();
-		src = StringUtil::RemoveStringTrail(src, TEXT(".") + srcExtension);
-		src.pop_back();
-		src += TEXT(".") + srcExtension;
-		auto srcFull = TEXT("https://") + StringUtil::RemoveStringLead(src, TEXT("//"));
-		srcs.push_back(srcFull);
+		auto href = HTMLParser::GetElementAttributeValueByName(threadA, TEXT("href"));
+		auto hrefFull = TEXT("https://") + StringUtil::RemoveStringLead(href, TEXT("//"));
+		srcs.push_back(hrefFull);
 
-		auto fileName = Utility::GUID().GetString() + TEXT(".") + File(srcFull).GetFileExtension();
+		auto fileName = Utility::GUID().GetString() + TEXT(".") + File(hrefFull).GetFileExtension();
 		auto file = DIRECTORY_4CHAN_BASE;
 		if (File::IsFileNameValid(nameStr)) {
 			file += File::MakeFileNameValid(nameStr);
@@ -113,7 +109,7 @@ int _tmain(int, wchar_t** argv) {
 	this_thread::sleep_for(10s);
 	while (filesCurrent != filesTotal) this_thread::sleep_for(1ms);
 
-	TRACE(sw.GetTimeElapsed(TEXT("Test")).count() / 1000000 << TEXT("ms"));
+	TRACE(duration_cast<seconds>(sw.GetTimeElapsed(TEXT("Test"))));
 
 	return 0;
 }
